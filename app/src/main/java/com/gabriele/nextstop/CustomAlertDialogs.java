@@ -24,15 +24,16 @@ public class CustomAlertDialogs {
     }
 
     @SuppressLint("MissingPermission")
-    public static void showStopDialog(Context context, Vibrator vibrator){
+    public static void showStopDialog(Context context){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("\uD83D\uDCCD Sei vicino alla fermata!");
         builder.setPositiveButton("Ferma vibrazione \uD83D\uDCF3 ", (dialog, which) -> {
-            if (vibrator != null) {
-                vibrator.cancel();
-                context.stopService(new Intent(context, ServizioTracciamento.class));
-                Toast.makeText(context," ⛔ Servizio disattivato\n Sei arrivato a destinazione \uD83C\uDF89",Toast.LENGTH_LONG).show();
-            }
+            Vibrator v = AppState.getInstance().getVibrator().getValue();
+            if (v != null) v.cancel(); // Ferma la vibrazione manualmente
+
+            context.stopService(new Intent(context, ServizioTracciamento.class));
+            Toast.makeText(context," ⛔ Servizio disattivato\n Sei arrivato a destinazione \uD83C\uDF89",Toast.LENGTH_LONG).show();
+
             dialog.dismiss();
 
             Intent intent = new Intent(context, MainActivity.class);
@@ -109,16 +110,12 @@ public class CustomAlertDialogs {
         }
     }
     public static void askNotification(PermissionHelper notificationPermission, MainActivity activity) {
-        // Verifica se il permesso è già stato concesso
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS)
-                == PackageManager.PERMISSION_GRANTED) {
-
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
-        // Se il permesso non è concesso, mostra un dialog
         new AlertDialog.Builder(activity)
-                .setTitle("Permesso notifiche")
+                .setTitle("Permesso notifiche \uD83D\uDD14 ")
                 .setMessage("L'app ha bisogno del permesso per inviarti notifiche, anche quando è in background.")
                 .setPositiveButton("OK", (dialog, which) -> {
                     // Crea il PermissionHelper e richiedi il permesso

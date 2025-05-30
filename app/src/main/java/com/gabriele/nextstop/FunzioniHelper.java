@@ -40,26 +40,7 @@ public class FunzioniHelper {
 
     @SuppressLint("MissingPermission")
     public static void mostraAvvisoEAvviaVibrazione(Activity activity) {
-        // Accendi lo schermo per qualche secondo
-        PowerManager powerManager = (PowerManager) activity.getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
-                PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                "NextStop::ScreenWakeLock");
-        wakeLock.acquire(3000);
-
-        vibrator = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
-
-        if (vibrator != null && vibrator.hasVibrator()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                VibrationEffect effect = VibrationEffect.createWaveform(
-                        new long[]{0, 500, 500}, 0); // 500ms ON, 500ms OFF, loop infinito
-                vibrator.vibrate(effect);
-            } else {
-                vibrator.vibrate(new long[]{0, 500, 500}, 0);
-            }
-        }
-
-        CustomAlertDialogs.showStopDialog(activity, vibrator);
+        CustomAlertDialogs.showStopDialog(activity);
     }
 
 
@@ -85,5 +66,7 @@ public class FunzioniHelper {
         String lon = String.valueOf(longitude).replace(',', '.');
         mappa.evaluateJavascript("updatePosition(" + lat + "," + lon + ")", null);
     }
-
+    public static void pulisciMarkerMappa(WebView mappa) {
+        mappa.evaluateJavascript("javascript:clearMarkers()", null);
+    }
 }

@@ -33,7 +33,7 @@ public class ServizioTracciamento extends Service {
 
     private String stopName;
     private double lat,lon;
-    private PowerManager.WakeLock wakeLock;
+
 
     public ServizioTracciamento(){
 
@@ -55,6 +55,7 @@ public class ServizioTracciamento extends Service {
 
                 for (Location location : locationResult.getLocations()) {
                     if (FunzioniHelper.isVicinoAllaDestinazione(location.getLatitude(), location.getLongitude(), lat, lon)) {
+                        System.out.println("ARRIVATOOOO");
                         Intent alertIntent = new Intent("com.gabriele.nextstop.ALERTA_FERMATA");
                         alertIntent.setClass(ServizioTracciamento.this, AlertReceiver.class);
                         sendBroadcast(alertIntent);
@@ -66,8 +67,7 @@ public class ServizioTracciamento extends Service {
             }
         };
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "NextStop::LocationWakeLock");
-        wakeLock.acquire(); // senza timeout -> resta attivo finché rilasciato manualmente
+
     }
 
     @SuppressLint("ForegroundServiceType")
@@ -110,7 +110,7 @@ public class ServizioTracciamento extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "NextStop";
             String description = "Abilita Notifiche per ottenere il tracciamento in background";
-            int importance = NotificationManager.IMPORTANCE_LOW;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
 
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
@@ -138,9 +138,6 @@ public class ServizioTracciamento extends Service {
 
     @Override
     public void onDestroy() {
-        if (wakeLock != null && wakeLock.isHeld()) {
-            wakeLock.release();
-        }
         AppState.getInstance().setTimerAttivo(false);
         AppState.getInstance().setFermataSelezionata(null);
         stopLocationUpdates();

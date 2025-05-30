@@ -76,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
         CustomAlertDialogs.askFineLocation(fineLocation,this,location); // CHIEDE PERMESSO DELLA POSIZIONE IN FOREGROUND
 
         CustomAlertDialogs.askBatteryOpt(this); // CHIEDE IL PERMESSO DELL'OTTIMIZZAZIONE DELLA BATTERIA
-
+        notificationPermission = new PermissionHelper(MainActivity.this,Manifest.permission.POST_NOTIFICATIONS,1002);
+        CustomAlertDialogs.askNotification(notificationPermission,MainActivity.this);
         //FINE PERMESSI , l'app se ha i permessi può procedere
 
         initWidget();
@@ -104,9 +105,9 @@ public class MainActivity extends AppCompatActivity {
                            backgroundLocation.checkAndRequestPermission(new PermissionHelper.PermissionCallback() {
                                @Override
                                public void onPermissionGranted() {
-                                   notificationPermission = new PermissionHelper(MainActivity.this,Manifest.permission.POST_NOTIFICATIONS,1002);
 
-                                    CustomAlertDialogs.askNotification(notificationPermission,MainActivity.this);
+
+
 
                                    if(AppState.getInstance().getTimerAttivo().getValue()){
                                        Toast.makeText(MainActivity.this, "\uD83D\uDD34 Timer già attivo per una fermata.", Toast.LENGTH_LONG).show();
@@ -148,7 +149,21 @@ public class MainActivity extends AppCompatActivity {
                 if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss(); // Nascondi il caricamento
                 }
+
                 listaFermate.clear();
+
+                if (fermate == null || fermate.isEmpty()) {
+                    // Nessuna fermata trovata
+                    Toast.makeText(MainActivity.this, "❌ Nessuna fermata trovata nella zona selezionata", Toast.LENGTH_LONG).show();
+
+                    // Pulisce i marker dalla mappa
+                    FunzioniHelper.pulisciMarkerMappa(mappa);
+
+                    adapter.notifyDataSetChanged();
+                    return;
+                }
+
+                // Se sono state trovate fermate
                 listaFermate.addAll(fermate);
                 FunzioniHelper.passaFermateAJs(listaFermate, mappa);
                 adapter.notifyDataSetChanged();
@@ -209,9 +224,13 @@ public class MainActivity extends AppCompatActivity {
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        fineLocation.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        backgroundLocation.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        notificationPermission.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (fineLocation != null) fineLocation.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        } else if (requestCode == LOCATION_BACK_CODE) {
+            if (backgroundLocation != null) backgroundLocation.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        } else if (requestCode == 1002) {
+            if (notificationPermission != null) notificationPermission.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        }
     }
 
     protected void onResume() {
