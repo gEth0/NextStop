@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">NextStop 🚏</string>
-    <string name="cerca_fermata" >Fermata (nome, paese o codice) di arrivo</string>
+    <string name="cerca_fermata">Fermata (nome, paese o codice) di arrivo</string>
 </resources>
